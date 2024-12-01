@@ -8,24 +8,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../hooks/useAuth";
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { estaAutenticado, usuario, cerrarSesion } = useAuth();
-
-  // Efecto para detectar scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const { estaAutenticado, nombreUsuario, perfilUsuario, cerrarSesion } =
+    useAuth();
 
   // Efecto para cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setShowUserMenu(false);
       }
     };
@@ -34,24 +28,25 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-        isScrolled ? "bg-white shadow-md" : "bg-white/80 backdrop-blur-lg"
-      }`}
-    >
+    <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
       <nav className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
           {/* Logo y nombre */}
-          <div className="flex items-center space-x-2">
-            <Link href="/" className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
               <Image
-                src="/axotl-logo.svg"
+                src={`${process.env.NEXT_PUBLIC_ASSETS_URL}/logoMorado2.png`}
                 alt="Axotl Xires Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8"
+                width={40}
+                height={40}
+                className="object-contain"
               />
-              <div className="ml-2 flex flex-col">
+              <span className="ml-2 text-2xl font-bold text-gray-800">
+                Axotl.org &nbsp;
+              </span>
+              <div className="h-6 w-px bg-gray-200" />
+              <div className="ml-3 flex flex-col">
+                
                 <span className="text-lg font-bold text-[#612c7d]">
                   Axotl Xires
                 </span>
@@ -59,21 +54,12 @@ const Navbar = () => {
                   Management Console
                 </span>
               </div>
-            </Link>
-            <div className="h-6 w-px bg-gray-200 mx-2" />
-            <Link 
-              href="https://axotl.org" 
-              target="_blank"
-              className="text-sm text-gray-500 hover:text-[#612c7d] transition-colors"
-            >
-              axotl.org
-            </Link>
+            </div>
+            
           </div>
 
           {/* Espacio para breadcrumbs */}
-          <div className="flex-1 mx-8">
-            {/* Breadcrumbs irán aquí */}
-          </div>
+          <div className="flex-1 mx-8">{/* Breadcrumbs irán aquí */}</div>
 
           {/* Menú derecho - solo visible si está autenticado */}
           {estaAutenticado && (
@@ -94,7 +80,7 @@ const Navbar = () => {
                     <User className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">
-                    {usuario?.nombre || 'Administrador'}
+                    {nombreUsuario || "Administrador"}
                   </span>
                 </button>
 
@@ -132,4 +118,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

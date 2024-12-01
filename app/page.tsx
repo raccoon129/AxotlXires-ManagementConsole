@@ -21,20 +21,22 @@ export default function Home() {
       <div className="w-1/3 flex items-center">
         <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
           <div className="flex flex-col items-center gap-6">
+            <br />
             <Image
-              src="/axotl-logo.svg"
+              src={`${process.env.NEXT_PUBLIC_ASSETS_URL}/logoMorado2.png`}
               alt="Axotl Xires Logo"
-              width={64}
-              height={64}
+              width={300}
+              height={300}
+              className="object-contain"
             />
             <h1 className="text-2xl font-bold text-gray-800">
-              Panel Administrativo
+              Ingrese sus credenciales
             </h1>
-            
+
             <form className="w-full space-y-4">
               <div>
-                <label 
-                  htmlFor="correo" 
+                <label
+                  htmlFor="correo"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Correo Electrónico
@@ -45,10 +47,10 @@ export default function Home() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#612c7d] focus:border-transparent"
                 />
               </div>
-              
+
               <div>
-                <label 
-                  htmlFor="contrasena" 
+                <label
+                  htmlFor="contrasena"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Contraseña
