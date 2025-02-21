@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Bell, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const Navbar = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);

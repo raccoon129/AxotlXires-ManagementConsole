@@ -7,13 +7,29 @@ interface EstadoAutenticacion {
   nombreUsuario: string | null;
   idUsuario: string | null;
   perfilUsuario: any | null;
+  rol: 'administrador' | 'moderador' | null;
   estaCargando: boolean;
 }
 
 interface TokenDecodificado {
   nombre: string;
   id: string;
+  rol: 'administrador' | 'moderador';
   exp: number;
+}
+
+interface RespuestaLogin {
+  status: 'success' | 'error';
+  mensaje: string;
+  datos?: {
+    usuario: {
+      id: number;
+      nombre: string;
+      correo: string;
+      rol: 'administrador' | 'moderador';
+    };
+    token: string;
+  };
 }
 
 export const useAuth = () => {
@@ -23,6 +39,7 @@ export const useAuth = () => {
     nombreUsuario: null,
     idUsuario: null,
     perfilUsuario: null,
+    rol: null,
     estaCargando: true
   });
 
@@ -63,10 +80,80 @@ export const useAuth = () => {
       nombreUsuario: null,
       idUsuario: null,
       perfilUsuario: null,
+      rol: null,
       estaCargando: false
     });
     router.push('/login');
   }, [router]);
+
+  // Verificar acceso al dashboard
+  const verificarAcceso = useCallback(async (token: string) => {
+    try {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-access`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      return respuesta.ok;
+    } catch (error) {
+      console.error('Error al verificar acceso:', error);
+      return false;
+    }
+  }, []);
+
+  // Iniciar sesión
+  const iniciarSesion = useCallback(async (correo: string, contrasena: string): Promise<RespuestaLogin> => {
+    try {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ correo, contrasena })
+      });
+
+      const datos: RespuestaLogin = await respuesta.json();
+
+      if (datos.status === 'success' && datos.datos) {
+        // Guardar token
+        localStorage.setItem('token', datos.datos.token);
+        
+        // Actualizar estado
+        setEstadoAuth({
+          estaAutenticado: true,
+          nombreUsuario: datos.datos.usuario.nombre,
+          idUsuario: datos.datos.usuario.id.toString(),
+          rol: datos.datos.usuario.rol,
+          perfilUsuario: datos.datos.usuario,
+          estaCargando: false
+        });
+
+        // Redirigir según el rol
+        const ruta = datos.datos.usuario.rol === 'administrador' 
+          ? '/dashboardAdministrador' 
+          : '/dashboardModerador';
+        
+        // Usar window.location para forzar recarga completa
+        window.location.href = ruta;
+      }
+
+      return datos;
+    } catch (error) {
+      // Manejar errores de red
+      if (error instanceof Error) {
+        return {
+          status: 'error',
+          mensaje: error.message
+        };
+      }
+      return {
+        status: 'error',
+        mensaje: 'Error inesperado durante el inicio de sesión'
+      };
+    }
+  }, []);
 
   // Verificar autenticación
   const verificarAutenticacion = useCallback(async () => {
@@ -85,10 +172,18 @@ export const useAuth = () => {
         return;
       }
 
+      // Verificar acceso al dashboard
+      const tieneAcceso = await verificarAcceso(token);
+      if (!tieneAcceso) {
+        cerrarSesion();
+        return;
+      }
+
       setEstadoAuth({
         estaAutenticado: true,
-        nombreUsuario: tokenDecodificado.nombre || null,
-        idUsuario: tokenDecodificado.id || null,
+        nombreUsuario: tokenDecodificado.nombre,
+        idUsuario: tokenDecodificado.id,
+        rol: tokenDecodificado.rol,
         perfilUsuario: null,
         estaCargando: false
       });
@@ -97,10 +192,10 @@ export const useAuth = () => {
         obtenerPerfilUsuario(tokenDecodificado.id);
       }
     } catch (error) {
-      console.error('Error al decodificar el token:', error);
+      console.error('Error al verificar autenticación:', error);
       cerrarSesion();
     }
-  }, [obtenerPerfilUsuario, cerrarSesion]);
+  }, [verificarAcceso, cerrarSesion]);
 
   // Efecto inicial
   useEffect(() => {
@@ -115,6 +210,7 @@ export const useAuth = () => {
 
   return { 
     ...estadoAuth,
+    iniciarSesion,
     cerrarSesion,
     actualizarPerfil: () => estadoAuth.idUsuario && obtenerPerfilUsuario(estadoAuth.idUsuario),
     actualizarAuthDespuesDeLogin
