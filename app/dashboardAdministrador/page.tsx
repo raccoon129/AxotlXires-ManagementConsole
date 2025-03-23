@@ -134,7 +134,7 @@ export default function DashboardAdministrador() {
       {/* Encabezado */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Panel de Control
+          Management Console
         </h1>
         <p className="text-gray-600">
           Bienvenido al panel de administración de Axotl Xires

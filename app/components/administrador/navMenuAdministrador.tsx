@@ -112,7 +112,7 @@ const NavMenuAdministrador = () => {
   return (
     <nav className="bg-white h-full shadow-lg overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-xl font-bold text-[#612c7d] mb-6">Panel de Control</h2>
+        <h2 className="text-xl font-bold text-[#612c7d] mb-6">Administrador</h2>
         <div className="space-y-2">
           {menuItems.map((item) => (
             <div key={item.id}>

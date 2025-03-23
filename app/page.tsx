@@ -139,9 +139,13 @@ export default function Home() {
           </div>
           <br />
           <label
-                  className="block text-sm font-medium text-gray-700 mb-1">
-                  Xires ICE 2025 - Todos los derechos reservados
-                </label>
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Xires AS 2025 - Todos los derechos reservados
+          </label>
+          <label
+                  className="block text-sm font-medium text-gray-700">
+                  Versión 0.1
+          </label>
         </div>
       </div>
     </div>
