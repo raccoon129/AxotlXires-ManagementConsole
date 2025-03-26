@@ -11,9 +11,12 @@ export default function Home() {
     contrasena: ""
   });
   const [cargando, setCargando] = useState(false);
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
   const { iniciarSesion } = useAuth();
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Al cambiar los campos, limpiar mensaje de error
+    setMensajeError(null);
     setCredenciales(prev => ({
       ...prev,
       [e.target.id]: e.target.value
@@ -22,11 +25,19 @@ export default function Home() {
 
   const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMensajeError(null);
     setCargando(true);
 
     try {
+      // Validaciones básicas en cliente
+      if (!credenciales.correo || !credenciales.contrasena) {
+        setMensajeError("Todos los campos son obligatorios");
+        return;
+      };
+      
       // Intentar inicio de sesión
       const resultado = await iniciarSesion(credenciales.correo, credenciales.contrasena);
+      
       
       if (resultado.status === 'success') {
         toast.success('¡Bienvenido al sistema!');
@@ -34,27 +45,35 @@ export default function Home() {
         // Manejar diferentes tipos de errores
         switch (resultado.mensaje) {
           case 'CREDENCIALES_INVALIDAS':
+            setMensajeError('Correo o contraseña incorrectos');
             toast.error('Correo o contraseña incorrectos');
             break;
           case 'SIN_PERMISOS':
+            setMensajeError('No tienes permisos para acceder al panel administrativo');
             toast.error('No tienes permisos para acceder al panel administrativo');
             break;
           default:
-            toast.error('Error al iniciar sesión');
+            setMensajeError(`Error: ${resultado.mensaje}`);
+            toast.error(`Error al iniciar sesión: ${resultado.mensaje}`);
         }
       }
     } catch (error) {
       // Manejar errores de red o del servidor
+      console.error('Error completo:', error);
+      
       if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch')) {
+        const mensajeError = error.message;
+        setMensajeError(mensajeError);
+        
+        if (mensajeError.includes('Failed to fetch')) {
           toast.error('Error de conexión. Por favor, verifica tu conexión a internet');
         } else {
-          toast.error(error.message);
+          toast.error(mensajeError);
         }
       } else {
+        setMensajeError('Error inesperado al iniciar sesión');
         toast.error('Error inesperado al iniciar sesión');
       }
-      console.error('Error durante el inicio de sesión:', error);
     } finally {
       setCargando(false);
     }
@@ -90,6 +109,13 @@ export default function Home() {
             <h1 className="text-2xl font-bold text-gray-800">
               Ingrese sus credenciales
             </h1>
+
+            {/* Mostrar mensaje de error si existe */}
+            {mensajeError && (
+              <div className="w-full bg-red-50 text-red-600 p-3 rounded-lg border border-red-200 text-sm">
+                {mensajeError}
+              </div>
+            )}
 
             <form onSubmit={manejarEnvio} className="w-full space-y-4">
               <div>
@@ -133,18 +159,24 @@ export default function Home() {
                 disabled={cargando}
                 className="w-full bg-[#2d567e] text-white py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {cargando ? "Iniciando sesión..." : "Iniciar Sesión"}
+                {cargando ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Iniciando sesión...
+                  </span>
+                ) : "Iniciar Sesión"}
               </button>
             </form>
           </div>
           <br />
-          <label
-                  className="block text-sm font-medium text-gray-700 mb-2">
-                  Xires AS 2025 - Todos los derechos reservados
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            AutomataSoft Xires 2025 - Todos los derechos reservados
           </label>
-          <label
-                  className="block text-sm font-medium text-gray-700">
-                  Versión 0.1
+          <label className="block text-sm font-medium text-gray-700">
+            Versión 0.1
           </label>
         </div>
       </div>

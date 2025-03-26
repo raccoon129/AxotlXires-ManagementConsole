@@ -17,6 +17,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { analyticsService, DashboardData, TendenciasData, ActividadData } from '../services/analytics';
 import Skeleton from '../components/ui/Skeleton';
+import ProtectedRoute from "@/app/components/auth/ProtectedRoute";
 
 // Interfaces para los datos locales
 interface EstadisticaCard {
@@ -130,25 +131,27 @@ export default function DashboardAdministrador() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Encabezado */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Management Console
-        </h1>
-        <p className="text-gray-600">
-          Bienvenido al panel de administración de Axotl Xires
-        </p>
-      </div>
+    <ProtectedRoute requiredRole="administrador">
+      <div className="space-y-8">
+        {/* Encabezado */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Management Console
+          </h1>
+          <p className="text-gray-600">
+            Bienvenido al panel de administración de Axotl Xires
+          </p>
+        </div>
 
-      {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {generarEstadisticas().map((estadistica, index) => (
-          <TarjetaEstadistica key={index} estadistica={estadistica} />
-        ))}
-      </div>
+        {/* Estadísticas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {generarEstadisticas().map((estadistica, index) => (
+            <TarjetaEstadistica key={index} estadistica={estadistica} />
+          ))}
+        </div>
 
-      {/* Continuará con más secciones... */}
-    </div>
+        {/* Continuará con más secciones... */}
+      </div>
+    </ProtectedRoute>
   );
 }
